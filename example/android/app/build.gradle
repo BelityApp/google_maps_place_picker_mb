@@ -39,7 +39,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.google_map_place_picker.example"
-        minSdkVersion Math.max(flutter.minSdkVersion, 21)
+        minSdkVersion Math.max(flutter.minSdkVersion, 23)
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName

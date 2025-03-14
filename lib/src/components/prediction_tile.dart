@@ -25,51 +25,50 @@ class PredictionTile extends StatelessWidget {
   }
 
   List<TextSpan> _buildPredictionText(BuildContext context) {
-    final List<TextSpan> result = <TextSpan>[];
     final textColor = Theme.of(context).textTheme.bodyMedium!.color;
+    final description = prediction.description ?? '';
 
-    if (prediction.matchedSubstrings.length > 0) {
-      MatchedSubstring matchedSubString = prediction.matchedSubstrings[0];
-      // There is no matched string at the beginning.
-      if (matchedSubString.offset > 0) {
-        result.add(
-          TextSpan(
-            text: prediction.description
-                ?.substring(0, matchedSubString.offset as int?),
-            style: TextStyle(
-                color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
-          ),
-        );
-      }
+    // If there is no matched strings, but there are predicts. (Not sure if this happens though)
+    if (prediction.matchedSubstrings.isEmpty) {
+      return [
+        TextSpan(
+          text: description,
+          style: TextStyle(
+              color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
+        ),
+      ];
+    }
 
-      // Matched strings.
+    final result = <TextSpan>[];
+    MatchedSubstring matchedSubString = prediction.matchedSubstrings[0];
+    final offset = matchedSubString.offset as int;
+    final length = matchedSubString.length as int;
+
+    // There is no matched string at the beginning.
+    if (offset > 0) {
       result.add(
         TextSpan(
-          text: prediction.description?.substring(
-              matchedSubString.offset as int,
-              matchedSubString.offset + matchedSubString.length as int?),
+          text: description.substring(0, offset),
           style: TextStyle(
-              color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
+              color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
         ),
       );
+    }
 
-      // Other strings.
-      if (matchedSubString.offset + matchedSubString.length <
-          (prediction.description?.length ?? 0)) {
-        result.add(
-          TextSpan(
-            text: prediction.description?.substring(
-                matchedSubString.offset + matchedSubString.length as int),
-            style: TextStyle(
-                color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
-          ),
-        );
-      }
-      // If there is no matched strings, but there are predicts. (Not sure if this happens though)
-    } else {
+    // Matched strings.
+    result.add(
+      TextSpan(
+        text: description.substring(offset, offset + length),
+        style: TextStyle(
+            color: textColor, fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+    );
+
+    // Other strings.
+    if (offset + length < description.length) {
       result.add(
         TextSpan(
-          text: prediction.description,
+          text: description.substring(offset + length),
           style: TextStyle(
               color: textColor, fontSize: 16, fontWeight: FontWeight.w300),
         ),

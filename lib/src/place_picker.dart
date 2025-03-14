@@ -43,6 +43,7 @@ class PlacePicker extends StatefulWidget {
     this.proxyBaseUrl,
     this.httpClient,
     this.selectedPlaceWidgetBuilder,
+    this.autocompleteSortByDistance = false,
     this.pinBuilder,
     this.introModalWidgetBuilder,
     this.autoCompleteDebounceInMilliseconds = 500,
@@ -102,6 +103,7 @@ class PlacePicker extends StatefulWidget {
     this.introModalWidgetBuilder,
     this.autoCompleteDebounceInMilliseconds = 500,
     this.cameraMoveDebounceInMilliseconds = 750,
+    this.autocompleteSortByDistance = false,
     this.initialMapType = MapType.normal,
     this.enableMapTypeButton = true,
     this.enableMyLocationButton = true,
@@ -139,6 +141,7 @@ class PlacePicker extends StatefulWidget {
   final LatLng initialPosition;
   final bool? useCurrentLocation;
   final LocationAccuracy desiredLocationAccuracy;
+  final bool autocompleteSortByDistance;
 
   final String? hintText;
   final String? searchingText;
@@ -454,7 +457,8 @@ class _PlacePickerState extends State<PlacePicker> {
               initialSearchString: widget.initialSearchString,
               searchForInitialValue: widget.searchForInitialValue,
               autocompleteOnTrailingWhitespace:
-                  widget.autocompleteOnTrailingWhitespace),
+                  widget.autocompleteOnTrailingWhitespace,
+              autocompleteSortByDistance: widget.autocompleteSortByDistance),
         ),
         SizedBox(width: 5),
       ],

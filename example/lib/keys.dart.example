@@ -1,4 +1,4 @@
 class APIKeys {
-   static String androidApiKey = "YOUR ANDROID KEY HERE";
-   static String iosApiKey = "YOUR IOS KEY HERE";
+   static const androidApiKey = "YOUR ANDROID KEY HERE";
+   static const iosApiKey = "YOUR IOS KEY HERE";
 }

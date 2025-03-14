@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_place_picker_mb/google_maps_place_picker.dart';
@@ -9,31 +10,36 @@ import 'package:google_maps_place_picker_mb/src/controllers/autocomplete_search_
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:provider/provider.dart';
 
+typedef Row AutoCompleteSearchBuilder(
+    BuildContext context, TextEditingController controller);
+
 class AutoCompleteSearch extends StatefulWidget {
-  const AutoCompleteSearch(
-      {Key? key,
-      required this.sessionToken,
-      required this.onPicked,
-      required this.appBarKey,
-      this.hintText = "Search here",
-      this.searchingText = "Searching...",
-      this.hidden = false,
-      this.height = 40,
-      this.contentPadding = EdgeInsets.zero,
-      this.debounceMilliseconds,
-      this.onSearchFailed,
-      required this.searchBarController,
-      this.autocompleteOffset,
-      this.autocompleteRadius,
-      this.autocompleteLanguage,
-      this.autocompleteComponents,
-      this.autocompleteTypes,
-      this.strictbounds,
-      this.region,
-      this.initialSearchString,
-      this.searchForInitialValue,
-      this.autocompleteOnTrailingWhitespace})
-      : super(key: key);
+  AutoCompleteSearch({
+    Key? key,
+    required this.sessionToken,
+    required this.onPicked,
+    required this.appBarKey,
+    this.hintText = "Search here",
+    this.searchingText = "Searching...",
+    this.hidden = false,
+    this.height = 40,
+    this.autocompleteSortByDistance,
+    this.contentPadding = EdgeInsets.zero,
+    this.debounceMilliseconds,
+    this.onSearchFailed,
+    required this.searchBarController,
+    this.autocompleteOffset,
+    this.autocompleteRadius,
+    this.autocompleteLanguage,
+    this.autocompleteComponents,
+    this.autocompleteTypes,
+    this.strictbounds,
+    this.region,
+    this.initialSearchString,
+    this.searchForInitialValue,
+    this.autocompleteOnTrailingWhitespace,
+    this.builder,
+  }) : super(key: key);
 
   final String? sessionToken;
   final String? hintText;
@@ -51,11 +57,13 @@ class AutoCompleteSearch extends StatefulWidget {
   final List<String>? autocompleteTypes;
   final List<Component>? autocompleteComponents;
   final bool? strictbounds;
+  final bool? autocompleteSortByDistance;
   final String? region;
   final GlobalKey appBarKey;
   final String? initialSearchString;
   final bool? searchForInitialValue;
   final bool? autocompleteOnTrailingWhitespace;
+  final AutoCompleteSearchBuilder? builder;
 
   @override
   AutoCompleteSearchState createState() => AutoCompleteSearchState();
@@ -96,48 +104,79 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
     super.dispose();
   }
 
+  num computeDistance(
+    num lat1,
+    num lng1,
+    num lat2,
+    num lng2,
+  ) {
+    var x = pi / 180;
+
+    lat1 *= x;
+    lng1 *= x;
+    lat2 *= x;
+    lng2 *= x;
+
+    var distance = 2 *
+        asin(sqrt(pow(sin((lat1 - lat2) / 2), 2) +
+            cos(lat1) * cos(lat2) * pow(sin((lng1 - lng2) / 2), 2)));
+
+    return distance * 6378137;
+  }
+
+  Widget _buildSearchBoxContentWithBuilder() {
+    var child = widget.builder!(context, controller);
+
+    assert(child.children.any((element) => element is SearchbarTextField));
+
+    child.children.forEach((t) {
+      if (t is SearchbarTextField) {
+        assert(t.controller != null,
+            "The controller parameter must be passed if the searchBuilder is being used.");
+      }
+    });
+
+    return child;
+  }
+
+  Widget _buildSearchBoxContent({Widget? prefix, Widget? suffix}) {
+    return Row(
+      children: <Widget>[
+        SizedBox(width: 10),
+        prefix != null ? prefix : Icon(Icons.search),
+        SizedBox(width: 10),
+        _buildSearchTextField(),
+        suffix != null ? suffix : _buildTextClearIcon(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return !widget.hidden
         ? ChangeNotifierProvider.value(
             value: provider,
             child: RoundedFrame(
-              height: widget.height,
-              padding: const EdgeInsets.only(right: 10),
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black54
-                  : Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              elevation: 4.0,
-              child: Row(
-                children: <Widget>[
-                  SizedBox(width: 10),
-                  Icon(Icons.search),
-                  SizedBox(width: 10),
-                  Expanded(child: _buildSearchTextField()),
-                  _buildTextClearIcon(),
-                ],
-              ),
-            ),
+                height: widget.height,
+                padding: const EdgeInsets.only(right: 10),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.black54
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                elevation: 4.0,
+                child: widget.builder == null
+                    ? _buildSearchBoxContent()
+                    : _buildSearchBoxContentWithBuilder()),
           )
         : Container();
   }
 
   Widget _buildSearchTextField() {
-    return TextField(
+    return SearchbarTextField(
       controller: controller,
-      focusNode: focus,
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        border: InputBorder.none,
-        errorBorder: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        focusedErrorBorder: InputBorder.none,
-        isDense: true,
-        contentPadding: widget.contentPadding,
-      ),
+      contentPadding: widget.contentPadding,
+      focus: focus,
+      hintText: widget.hintText,
     );
   }
 
@@ -274,9 +313,38 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
     );
   }
 
-  Widget _buildPredictionOverlay(List<Prediction> predictions) {
+  Future<Widget> _buildPredictionOverlay(List<Prediction> predictions) async {
+    PlaceProvider placeProvider = PlaceProvider.of(context, listen: false);
+    var map = <Prediction, num>{};
+    var sortedPredictions = <Prediction>[];
+
+    if (placeProvider.currentPosition != null &&
+        widget.autocompleteSortByDistance == true) {
+      for (var i = 0; i < predictions.length; i++) {
+        var data = await placeProvider.places.getDetailsByPlaceId(
+          predictions[i].placeId!,
+          sessionToken: placeProvider.sessionToken,
+        );
+
+        map.addAll({
+          predictions[i]: computeDistance(
+            placeProvider.currentPosition!.latitude,
+            placeProvider.currentPosition!.longitude,
+            data.result.geometry!.location.lat,
+            data.result.geometry!.location.lng,
+          )
+        });
+      }
+
+      var sortedMapEntries = map.entries.toList()
+        ..sort((a, b) => a.value.compareTo(b.value));
+
+      sortedMapEntries.forEach((element) {
+        sortedPredictions.add(element.key);
+      });
+    }
     return ListBody(
-      children: predictions
+      children: (sortedPredictions.isNotEmpty ? sortedPredictions : predictions)
           .map(
             (p) => PredictionTile(
               prediction: p,
@@ -320,7 +388,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
         return;
       }
 
-      _displayOverlay(_buildPredictionOverlay(response.predictions));
+      _displayOverlay(await _buildPredictionOverlay(response.predictions));
     }
   }
 

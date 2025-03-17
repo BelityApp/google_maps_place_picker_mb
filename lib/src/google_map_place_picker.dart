@@ -407,6 +407,8 @@ class GoogleMapPlacePicker extends StatelessWidget {
             right: 2,
             child: Card(
               elevation: 4.0,
+              color: Theme.of(context).cardColor,
+              surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),

@@ -32,6 +32,7 @@ class PlacePicker extends StatefulWidget {
       this.onPlacePicked,
       required this.initialPosition,
       this.useCurrentLocation,
+      this.focusNode,
       this.desiredLocationAccuracy = LocationAccuracy.high,
       this.onMapCreated,
       this.hintText,
@@ -136,6 +137,7 @@ class PlacePicker extends StatefulWidget {
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
     this.textEditingController,
+    this.focusNode,
   }) : super(key: key);
 
   final String apiKey;
@@ -171,6 +173,7 @@ class PlacePicker extends StatefulWidget {
   final bool? strictbounds;
   final String? region;
   final TextEditingController? textEditingController;
+  final FocusNode? focusNode;
 
   /// If set the picker can only pick addresses in the given circle area.
   /// The section will be highlighted.
@@ -303,6 +306,8 @@ class _PlacePickerState extends State<PlacePicker> {
   GlobalKey appBarKey = GlobalKey();
   late final Future<PlaceProvider> _futureProvider;
   late final TextEditingController textEditingController;
+  late final FocusNode focusNode;
+
   PlaceProvider? provider;
   SearchBarController searchBarController = SearchBarController();
   bool showIntroModal = true;
@@ -311,6 +316,9 @@ class _PlacePickerState extends State<PlacePicker> {
   void initState() {
     textEditingController =
         widget.textEditingController ?? TextEditingController();
+
+    focusNode = widget.focusNode ?? FocusNode();
+
     super.initState();
 
     _futureProvider = _initPlaceProvider();
@@ -442,6 +450,7 @@ class _PlacePickerState extends State<PlacePicker> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: AutoCompleteSearch(
               builder: widget.searchBuilder,
+              focus: focusNode,
               appBarKey: appBarKey,
               controller: textEditingController,
               searchBarController: searchBarController,

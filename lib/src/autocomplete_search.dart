@@ -40,6 +40,7 @@ class AutoCompleteSearch extends StatefulWidget {
     this.autocompleteOnTrailingWhitespace,
     this.builder,
     this.controller,
+    this.focus,
   }) : super(key: key);
 
   final String? sessionToken;
@@ -66,6 +67,7 @@ class AutoCompleteSearch extends StatefulWidget {
   final bool? autocompleteOnTrailingWhitespace;
   final AutoCompleteSearchBuilder? builder;
   final TextEditingController? controller;
+  final FocusNode? focus;
 
   @override
   AutoCompleteSearchState createState() => AutoCompleteSearchState();
@@ -73,13 +75,14 @@ class AutoCompleteSearch extends StatefulWidget {
 
 class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   late final TextEditingController controller;
-  FocusNode focus = FocusNode();
+  late final FocusNode focus;
   OverlayEntry? overlayEntry;
   SearchProvider provider = SearchProvider();
 
   @override
   void initState() {
     controller = widget.controller ?? TextEditingController();
+    focus = widget.focus ?? FocusNode();
 
     super.initState();
 

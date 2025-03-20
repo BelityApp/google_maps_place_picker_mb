@@ -54,6 +54,7 @@ class PlacePicker extends StatefulWidget {
     this.myLocationButtonCooldown = 10,
     this.usePinPointingSearch = true,
     this.usePlaceDetailSearch = false,
+    this.searchBarController,
     this.autocompleteOffset,
     this.autocompleteRadius,
     this.autocompleteLanguage,
@@ -127,6 +128,7 @@ class PlacePicker extends StatefulWidget {
     this.autocompleteOnTrailingWhitespace = false,
     this.hidePlaceDetailsWhenDraggingPin = true,
     this.ignoreLocationPermissionErrors = false,
+    this.searchBarController,
     this.onTapBack,
     this.onCameraMoveStarted,
     this.onCameraMove,
@@ -253,6 +255,8 @@ class PlacePicker extends StatefulWidget {
   // the Navigator will try to pop instead.
   final VoidCallback? onTapBack;
 
+  final SearchBarController? searchBarController;
+
   final AutoCompleteSearchBuilder? searchBuilder;
 
   /// GoogleMap pass-through events:
@@ -300,13 +304,13 @@ class _PlacePickerState extends State<PlacePicker> {
   GlobalKey appBarKey = GlobalKey();
   late final Future<PlaceProvider> _futureProvider;
   PlaceProvider? provider;
-  SearchBarController searchBarController = SearchBarController();
+  late final SearchBarController searchBarController;
   bool showIntroModal = true;
 
   @override
   void initState() {
+    _initSearchBarController();
     super.initState();
-
     _futureProvider = _initPlaceProvider();
   }
 
@@ -315,6 +319,10 @@ class _PlacePickerState extends State<PlacePicker> {
     searchBarController.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _initSearchBarController() async {
+    searchBarController = widget.searchBarController ?? SearchBarController();
   }
 
   Future<PlaceProvider> _initPlaceProvider() async {
@@ -363,6 +371,7 @@ class _PlacePickerState extends State<PlacePicker> {
                       automaticallyImplyLeading: false,
                       iconTheme: Theme.of(context).iconTheme,
                       elevation: 0,
+                      toolbarHeight: 100,
                       backgroundColor: Colors.transparent,
                       titleSpacing: 0.0,
                       title: _buildSearchBar(context),
@@ -404,7 +413,8 @@ class _PlacePickerState extends State<PlacePicker> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         SizedBox(width: 15),
         provider!.placeSearchingState == SearchingState.Idle &&
@@ -428,7 +438,8 @@ class _PlacePickerState extends State<PlacePicker> {
                 color: Colors.black.withAlpha(128),
                 padding: EdgeInsets.zero)
             : Container(),
-        Expanded(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: AutoCompleteSearch(
               builder: widget.searchBuilder,
               appBarKey: appBarKey,

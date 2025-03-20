@@ -26,60 +26,61 @@ enum PinState { Preparing, Idle, Dragging }
 enum SearchingState { Idle, Searching }
 
 class PlacePicker extends StatefulWidget {
-  PlacePicker({
-    Key? key,
-    required this.apiKey,
-    this.onPlacePicked,
-    required this.initialPosition,
-    this.useCurrentLocation,
-    this.desiredLocationAccuracy = LocationAccuracy.high,
-    this.onMapCreated,
-    this.hintText,
-    this.searchingText,
-    this.selectText,
-    this.outsideOfPickAreaText,
-    this.onAutoCompleteFailed,
-    this.onGeocodingSearchFailed,
-    this.proxyBaseUrl,
-    this.httpClient,
-    this.selectedPlaceWidgetBuilder,
-    this.autocompleteSortByDistance = false,
-    this.pinBuilder,
-    this.introModalWidgetBuilder,
-    this.autoCompleteDebounceInMilliseconds = 500,
-    this.cameraMoveDebounceInMilliseconds = 750,
-    this.initialMapType = MapType.normal,
-    this.enableMapTypeButton = true,
-    this.enableMyLocationButton = true,
-    this.myLocationButtonCooldown = 10,
-    this.usePinPointingSearch = true,
-    this.usePlaceDetailSearch = false,
-    this.autocompleteOffset,
-    this.autocompleteRadius,
-    this.autocompleteLanguage,
-    this.autocompleteComponents,
-    this.autocompleteTypes,
-    this.strictbounds,
-    this.region,
-    this.pickArea,
-    this.selectInitialPosition = false,
-    this.resizeToAvoidBottomInset = true,
-    this.initialSearchString,
-    this.searchForInitialValue = false,
-    this.forceSearchOnZoomChanged = false,
-    this.automaticallyImplyAppBarLeading = true,
-    this.autocompleteOnTrailingWhitespace = false,
-    this.hidePlaceDetailsWhenDraggingPin = true,
-    this.ignoreLocationPermissionErrors = false,
-    this.onTapBack,
-    this.onCameraMoveStarted,
-    this.onCameraMove,
-    this.onCameraIdle,
-    this.onMapTypeChanged,
-    this.searchBuilder,
-    this.zoomGesturesEnabled = true,
-    this.zoomControlsEnabled = false,
-  }) : super(key: key);
+  PlacePicker(
+      {Key? key,
+      required this.apiKey,
+      this.onPlacePicked,
+      required this.initialPosition,
+      this.useCurrentLocation,
+      this.desiredLocationAccuracy = LocationAccuracy.high,
+      this.onMapCreated,
+      this.hintText,
+      this.searchingText,
+      this.selectText,
+      this.outsideOfPickAreaText,
+      this.onAutoCompleteFailed,
+      this.onGeocodingSearchFailed,
+      this.proxyBaseUrl,
+      this.httpClient,
+      this.selectedPlaceWidgetBuilder,
+      this.autocompleteSortByDistance = false,
+      this.pinBuilder,
+      this.introModalWidgetBuilder,
+      this.autoCompleteDebounceInMilliseconds = 500,
+      this.cameraMoveDebounceInMilliseconds = 750,
+      this.initialMapType = MapType.normal,
+      this.enableMapTypeButton = true,
+      this.enableMyLocationButton = true,
+      this.myLocationButtonCooldown = 10,
+      this.usePinPointingSearch = true,
+      this.usePlaceDetailSearch = false,
+      this.autocompleteOffset,
+      this.autocompleteRadius,
+      this.autocompleteLanguage,
+      this.autocompleteComponents,
+      this.autocompleteTypes,
+      this.strictbounds,
+      this.region,
+      this.pickArea,
+      this.selectInitialPosition = false,
+      this.resizeToAvoidBottomInset = true,
+      this.initialSearchString,
+      this.searchForInitialValue = false,
+      this.forceSearchOnZoomChanged = false,
+      this.automaticallyImplyAppBarLeading = true,
+      this.autocompleteOnTrailingWhitespace = false,
+      this.hidePlaceDetailsWhenDraggingPin = true,
+      this.ignoreLocationPermissionErrors = false,
+      this.onTapBack,
+      this.onCameraMoveStarted,
+      this.onCameraMove,
+      this.onCameraIdle,
+      this.onMapTypeChanged,
+      this.searchBuilder,
+      this.zoomGesturesEnabled = true,
+      this.zoomControlsEnabled = false,
+      this.textEditingController})
+      : super(key: key);
 
   PlacePicker.searchBuilder({
     Key? key,
@@ -134,6 +135,7 @@ class PlacePicker extends StatefulWidget {
     this.onMapTypeChanged,
     this.zoomGesturesEnabled = true,
     this.zoomControlsEnabled = false,
+    this.textEditingController,
   }) : super(key: key);
 
   final String apiKey;
@@ -168,6 +170,7 @@ class PlacePicker extends StatefulWidget {
   final List<Component>? autocompleteComponents;
   final bool? strictbounds;
   final String? region;
+  final TextEditingController? textEditingController;
 
   /// If set the picker can only pick addresses in the given circle area.
   /// The section will be highlighted.
@@ -299,12 +302,15 @@ class PlacePicker extends StatefulWidget {
 class _PlacePickerState extends State<PlacePicker> {
   GlobalKey appBarKey = GlobalKey();
   late final Future<PlaceProvider> _futureProvider;
+  late final TextEditingController textEditingController;
   PlaceProvider? provider;
   SearchBarController searchBarController = SearchBarController();
   bool showIntroModal = true;
 
   @override
   void initState() {
+    textEditingController =
+        widget.textEditingController ?? TextEditingController();
     super.initState();
 
     _futureProvider = _initPlaceProvider();
@@ -435,6 +441,7 @@ class _PlacePickerState extends State<PlacePicker> {
           child: AutoCompleteSearch(
               builder: widget.searchBuilder,
               appBarKey: appBarKey,
+              controller: textEditingController,
               searchBarController: searchBarController,
               sessionToken: provider!.sessionToken,
               hintText: widget.hintText,

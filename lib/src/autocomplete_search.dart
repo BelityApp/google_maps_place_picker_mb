@@ -153,20 +153,24 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return !widget.hidden
         ? ChangeNotifierProvider.value(
             value: provider,
             child: RoundedFrame(
-                height: widget.height,
-                padding: const EdgeInsets.only(right: 10),
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.black54
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                elevation: 4.0,
-                child: widget.builder == null
-                    ? _buildSearchBoxContent()
-                    : _buildSearchBoxContentWithBuilder()),
+              height: widget.height,
+              borderColor: colorScheme.primary,
+              padding: const EdgeInsets.only(right: 10),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black54
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              elevation: 6.0,
+              child: widget.builder == null
+                  ? _buildSearchBoxContent()
+                  : _buildSearchBoxContentWithBuilder(),
+            ),
           )
         : Container();
   }

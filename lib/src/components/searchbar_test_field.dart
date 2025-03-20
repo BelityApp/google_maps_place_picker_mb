@@ -23,6 +23,8 @@ class SearchbarTextField extends StatefulWidget {
 class _SearchbarTextFieldState extends State<SearchbarTextField> {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Expanded(
       child: TextField(
         controller: widget.controller,

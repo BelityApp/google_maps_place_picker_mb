@@ -39,7 +39,12 @@ class RoundedFrame extends StatelessWidget {
             : materialType ?? MaterialType.canvas,
         color: color,
         shape: RoundedRectangleBorder(
-            borderRadius: borderRadius, side: BorderSide(color: borderColor)),
+          borderRadius: borderRadius,
+          side: BorderSide(
+            color: borderColor,
+            width: 2.0,
+          ),
+        ),
         elevation: elevation,
         child: ClipRRect(
           borderRadius: borderRadius,

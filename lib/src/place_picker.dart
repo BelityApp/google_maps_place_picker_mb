@@ -54,7 +54,6 @@ class PlacePicker extends StatefulWidget {
     this.myLocationButtonCooldown = 10,
     this.usePinPointingSearch = true,
     this.usePlaceDetailSearch = false,
-    this.searchBarController,
     this.autocompleteOffset,
     this.autocompleteRadius,
     this.autocompleteLanguage,
@@ -128,7 +127,6 @@ class PlacePicker extends StatefulWidget {
     this.autocompleteOnTrailingWhitespace = false,
     this.hidePlaceDetailsWhenDraggingPin = true,
     this.ignoreLocationPermissionErrors = false,
-    this.searchBarController,
     this.onTapBack,
     this.onCameraMoveStarted,
     this.onCameraMove,
@@ -255,8 +253,6 @@ class PlacePicker extends StatefulWidget {
   // the Navigator will try to pop instead.
   final VoidCallback? onTapBack;
 
-  final SearchBarController? searchBarController;
-
   final AutoCompleteSearchBuilder? searchBuilder;
 
   /// GoogleMap pass-through events:
@@ -304,13 +300,13 @@ class _PlacePickerState extends State<PlacePicker> {
   GlobalKey appBarKey = GlobalKey();
   late final Future<PlaceProvider> _futureProvider;
   PlaceProvider? provider;
-  late final SearchBarController searchBarController;
+  SearchBarController searchBarController = SearchBarController();
   bool showIntroModal = true;
 
   @override
   void initState() {
-    _initSearchBarController();
     super.initState();
+
     _futureProvider = _initPlaceProvider();
   }
 
@@ -319,10 +315,6 @@ class _PlacePickerState extends State<PlacePicker> {
     searchBarController.dispose();
 
     super.dispose();
-  }
-
-  Future<void> _initSearchBarController() async {
-    searchBarController = widget.searchBarController ?? SearchBarController();
   }
 
   Future<PlaceProvider> _initPlaceProvider() async {
@@ -371,7 +363,7 @@ class _PlacePickerState extends State<PlacePicker> {
                       automaticallyImplyLeading: false,
                       iconTheme: Theme.of(context).iconTheme,
                       elevation: 0,
-                      toolbarHeight: 100,
+                      toolbarHeight: 110,
                       backgroundColor: Colors.transparent,
                       titleSpacing: 0.0,
                       title: _buildSearchBar(context),

@@ -411,6 +411,8 @@ class _PlacePickerState extends State<PlacePicker> {
   }
 
   Widget _buildSearchBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -433,7 +435,7 @@ class _PlacePickerState extends State<PlacePicker> {
                 icon: Icon(
                   Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
                 ),
-                color: Colors.black.withAlpha(128),
+                color: colorScheme.primary,
                 padding: EdgeInsets.zero)
             : Container(),
         Padding(

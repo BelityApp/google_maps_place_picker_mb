@@ -1,3 +1,8 @@
+## [4.0.0] - 8/Jul/2025
+
+- Upgrade packages
+- Fix `package_info_plus` compatibility
+
 ## [3.1.2] - 13/Sep/2023
 
 - Fix potential crash on hesitant camera movements #67
